@@ -7,7 +7,9 @@ export async function processQuery(url, prompt) {
     },
     body: JSON.stringify({
       model: "llama3.2",
-      prompt: "You're an assistand, answer this:" + prompt,
+      prompt:
+        "You're a roleplaying GM. create a fantasy RPG setting for the user that can be played as a text adventure: " +
+        prompt,
     }),
   };
 
