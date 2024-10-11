@@ -10,7 +10,7 @@ app.use(cors());
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.use(express.static(path.join(__dirname), "public"));
+app.use(express.static(path.join(__dirname, "public")));
 const port = 3000;
 app.post("/api/prompt", (req, res) => {
   const { prompt } = req.body;
