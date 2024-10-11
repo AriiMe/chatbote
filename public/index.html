@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chat Interface</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            padding: 2em;
+        }
+
+        .messages {
+            flex: 1;
+            padding: .5em;
+            overflow-y: auto;
+            background: #ffeeee;
+            border-radius: .5em .5em 0 0;
+        }
+
+        .actions {
+            display: flex;
+            background: #ffeeee;
+            border-radius: 0 0 .5em .5em;
+            padding: .5em;
+        }
+
+        input {
+            flex: 1;
+            padding: .5em;
+            border: none;
+            border-radius: .3em 0 0 .3em;
+        }
+
+        button {
+            padding: 1em 3em;
+            border: none;
+            background-color: magenta;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 0 .3em .3em 0;
+        }
+
+        button:hover {
+            background-color: #e3e;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="messages"></div>
+    <form class="actions">
+        <input type="text" placeholder="Type a message...">
+        <button>Send</button>
+    </form>
+
+    <script>
+        const messageLog = document.querySelector('.messages');
+        const messageInput = document.querySelector('input');
+        const form = document.querySelector('form');
+
+        let loading = false;
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            if (loading === false) {
+                loading = true;
+                sendMessage();
+            } else {
+                printMsg('Please wait for the bot to respond.', null, false);
+            }
+        });
+
+        function printMsg(msg, from, stopload = true) {
+            const messageElement = document.createElement('div');
+            if (from) {
+                const currentTime = new Date().toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                });
+                msg = `${currentTime} <${from}> ${msg}`
+            } else {
+                messageElement.style.margin = '1em';
+            }
+
+            messageElement.textContent = msg;
+            messageLog.appendChild(messageElement);
+            messageLog.scrollTop = messageLog.scrollHeight;
+            if (stopload) {
+                loading = false;
+            }
+        }
+
+        function sendMessage() {
+            const prompt = messageInput.value.trim();
+            if (prompt) {
+                printMsg(prompt, 'You', false);
+                messageInput.value = '';
+                messageLog.scrollTop = messageLog.scrollHeight;
+            }
+
+            fetch('/api/prompt', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    printMsg(data.message, 'Bot');
+                })
+                .catch((error) => {
+                    console.error(error);
+                    printMsg('An error occurred. Please try again.', 'Bot');
+                });
+        }
+    </script>
+</body>
+
+</html>
